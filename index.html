@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fritzel ADJOVI — Administrateur Infrastructure Sécurisée</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07070d;
+  --bg2:#0e0e18;
+  --bg3:#13131f;
+  --accent:#7f77dd;
+  --accent2:#5dcaa5;
+  --accent3:#ef9f27;
+  --text:#eeeaf8;
+  --muted:#6b6880;
+  --border:rgba(127,119,221,0.12);
+  --glow:rgba(127,119,221,0.15);
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  font-size:15px;
+  line-height:1.7;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CUSTOM CURSOR */
+.cursor{
+  width:10px;height:10px;
+  background:var(--accent);
+  border-radius:50%;
+  position:fixed;
+  pointer-events:none;
+  z-index:9999;
+  transition:transform .15s ease, opacity .15s;
+  transform:translate(-50%,-50%);
+}
+.cursor-ring{
+  width:36px;height:36px;
+  border:1px solid rgba(127,119,221,0.5);
+  border-radius:50%;
+  position:fixed;
+  pointer-events:none;
+  z-index:9998;
+  transition:transform .35s ease, width .2s, height .2s;
+  transform:translate(-50%,-50%);
+}
+a:hover ~ .cursor, button:hover ~ .cursor{transform:translate(-50%,-50%) scale(2)}
+
+/* NOISE OVERLAY */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:1;
+  opacity:0.4;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  padding:1.2rem 3rem;
+  display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(20px);
+  background:rgba(7,7,13,0.7);
+  border-bottom:1px solid var(--border);
+  transition:all .3s;
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:1.1rem;
+  color:var(--text);
+  text-decoration:none;
+  letter-spacing:-0.5px;
+}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{
+  color:var(--muted);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:0.5px;
+  transition:color .2s;
+  position:relative;
+}
+.nav-links a::after{
+  content:'';
+  position:absolute;bottom:-4px;left:0;right:0;
+  height:1px;background:var(--accent);
+  transform:scaleX(0);transition:transform .3s;
+}
+.nav-links a:hover{color:var(--text)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.nav-pages{display:flex;gap:1rem}
+.nav-btn{
+  padding:6px 16px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:12px;
+  font-weight:500;
+  transition:all .2s;
+  background:transparent;
+}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--glow)}
+.nav-btn.active{border-color:var(--accent);color:var(--accent);background:var(--glow)}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:8rem 3rem 4rem;
+  position:relative;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 40%, rgba(127,119,221,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 70%, rgba(93,202,165,0.05) 0%, transparent 60%);
+  pointer-events:none;
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(127,119,221,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127,119,221,0.04) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+  pointer-events:none;
+}
+.hero-content{
+  position:relative;z-index:2;
+  max-width:750px;
+}
+.hero-eyebrow{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:1.5rem;
+  opacity:0;animation:fadeUp .6s .2s forwards;
+}
+.hero-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent2);
+  box-shadow:0 0 12px var(--accent2);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.8)}}
+.hero-eyebrow span{
+  font-size:12px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--accent2);font-weight:500;
+}
+.hero-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(3rem, 7vw, 5.5rem);
+  font-weight:800;
+  line-height:1.05;
+  letter-spacing:-2px;
+  margin-bottom:1.5rem;
+  opacity:0;animation:fadeUp .7s .4s forwards;
+}
+.hero-title .line{display:block;overflow:hidden}
+.hero-title .accent{color:var(--accent)}
+.hero-title .accent2{
+  -webkit-text-stroke:1px var(--accent2);
+  color:transparent;
+}
+.hero-sub{
+  font-size:16px;
+  color:var(--muted);
+  max-width:480px;
+  line-height:1.8;
+  margin-bottom:2.5rem;
+  opacity:0;animation:fadeUp .7s .6s forwards;
+}
+.hero-sub strong{color:var(--text);font-weight:500}
+.hero-actions{
+  display:flex;gap:1rem;flex-wrap:wrap;
+  opacity:0;animation:fadeUp .7s .8s forwards;
+}
+.btn-primary{
+  padding:12px 28px;
+  background:var(--accent);
+  color:#fff;
+  text-decoration:none;
+  border-radius:30px;
+  font-size:13px;font-weight:600;
+  letter-spacing:0.5px;
+  transition:all .3s;
+  box-shadow:0 0 30px rgba(127,119,221,0.3);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(127,119,221,0.5)}
+.btn-secondary{
+  padding:12px 28px;
+  border:1px solid var(--border);
+  color:var(--text);
+  text-decoration:none;
+  border-radius:30px;
+  font-size:13px;font-weight:500;
+  transition:all .3s;
+}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);background:var(--glow)}
+
+.hero-stats{
+  position:absolute;right:5%;bottom:15%;
+  display:flex;flex-direction:column;gap:1.5rem;
+  opacity:0;animation:fadeLeft .8s 1s forwards;
+  z-index:2;
+}
+.stat{text-align:right}
+.stat-num{
+  font-family:'Syne',sans-serif;
+  font-size:2.2rem;font-weight:800;
+  color:var(--text);
+  line-height:1;
+}
+.stat-num span{color:var(--accent)}
+.stat-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.stat-line{width:40px;height:1px;background:var(--border);margin-left:auto;margin-top:8px}
+
+.scroll-hint{
+  position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:fadeUp .6s 1.4s forwards;
+  color:var(--muted);font-size:11px;letter-spacing:2px;text-transform:uppercase;
+}
+.scroll-line{
+  width:1px;height:50px;background:linear-gradient(to bottom,var(--accent),transparent);
+  animation:scrollAnim 2s infinite;
+}
+@keyframes scrollAnim{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* SECTIONS */
+section{padding:6rem 3rem;position:relative;z-index:2}
+.section-header{margin-bottom:3rem}
+.section-num{
+  font-family:'Syne',sans-serif;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:.5rem;
+}
+.section-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2rem,4vw,3rem);
+  font-weight:800;letter-spacing:-1px;
+  color:var(--text);line-height:1.1;
+}
+.section-title span{color:var(--accent)}
+
+/* SKILLS */
+.skills-section{background:var(--bg2)}
+.skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.skill-card{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:1.8rem;
+  transition:all .3s;
+  position:relative;overflow:hidden;
+}
+.skill-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transform:scaleX(0);transition:transform .3s;transform-origin:left;
+}
+.skill-card:hover{border-color:rgba(127,119,221,0.3);transform:translateY(-4px)}
+.skill-card:hover::before{transform:scaleX(1)}
+.skill-icon{font-size:28px;margin-bottom:1rem}
+.skill-name{
+  font-family:'Syne',sans-serif;font-weight:700;
+  font-size:1rem;margin-bottom:1rem;color:var(--text);
+}
+.skill-tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{
+  font-size:11px;padding:3px 10px;border-radius:20px;
+  border:1px solid;
+}
+.tag-p{background:rgba(127,119,221,0.08);border-color:rgba(127,119,221,0.2);color:#a9a3e8}
+.tag-g{background:rgba(93,202,165,0.08);border-color:rgba(93,202,165,0.2);color:#5dcaa5}
+.tag-a{background:rgba(239,159,39,0.08);border-color:rgba(239,159,39,0.2);color:#ef9f27}
+.tag-b{background:rgba(55,138,221,0.08);border-color:rgba(55,138,221,0.2);color:#378add}
+
+/* PROJETS PREVIEW */
+.projects-preview{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.proj-card{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:2rem;
+  text-decoration:none;
+  display:block;
+  transition:all .3s;
+  position:relative;overflow:hidden;
+  cursor:none;
+}
+.proj-card::after{
+  content:'→';
+  position:absolute;top:1.5rem;right:1.5rem;
+  font-size:1.2rem;color:var(--accent);
+  opacity:0;transform:translateX(-8px);
+  transition:all .3s;
+}
+.proj-card:hover{border-color:rgba(127,119,221,0.35);transform:translateY(-4px)}
+.proj-card:hover::after{opacity:1;transform:translateX(0)}
+.proj-card.featured{
+  grid-column:span 2;
+  background:linear-gradient(135deg,var(--bg3) 0%,rgba(127,119,221,0.05) 100%);
+  border-color:rgba(127,119,221,0.2);
+}
+.proj-os{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:1rem;
+}
+.proj-os-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.proj-title{
+  font-family:'Syne',sans-serif;
+  font-size:1.15rem;font-weight:700;
+  color:var(--text);margin-bottom:.75rem;line-height:1.3;
+}
+.proj-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1rem}
+.proj-tags{display:flex;flex-wrap:wrap;gap:6px}
+
+/* PARCOURS */
+.timeline{position:relative;padding-left:2rem;max-width:700px}
+.timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,var(--accent),transparent)}
+.tl-item{position:relative;margin-bottom:3rem}
+.tl-dot{
+  position:absolute;left:-2.4rem;top:6px;
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid var(--accent);
+  background:var(--bg);
+  transition:all .3s;
+}
+.tl-item:hover .tl-dot{background:var(--accent);box-shadow:0 0 20px var(--accent)}
+.tl-date{font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:.4rem}
+.tl-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
+.tl-place{font-size:13px;color:var(--accent2);margin-bottom:.5rem}
+.tl-desc{font-size:13px;color:var(--muted);line-height:1.7}
+.tl-dot.green{border-color:var(--accent2)}
+.tl-item:hover .tl-dot.green{background:var(--accent2);box-shadow:0 0 20px var(--accent2)}
+
+/* ABOUT */
+.about-section{background:var(--bg2)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.about-text{font-size:15px;color:var(--muted);line-height:2;margin-bottom:1.5rem}
+.about-text strong{color:var(--text);font-weight:500}
+.about-photo{
+  aspect-ratio:3/4;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:20px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.about-photo-placeholder{
+  display:flex;flex-direction:column;align-items:center;gap:1rem;
+  color:var(--muted);font-size:13px;text-align:center;padding:2rem;
+}
+.about-photo-icon{
+  width:80px;height:80px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#fff;
+}
+.about-photo::before{
+  content:'';position:absolute;top:-50%;left:-50%;
+  width:200%;height:200%;
+  background:conic-gradient(from 0deg,transparent 0deg,rgba(127,119,221,0.05) 60deg,transparent 120deg);
+  animation:rotate 8s linear infinite;
+}
+@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* CONTACT */
+.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.contact-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:14px;padding:1.5rem;
+  text-decoration:none;
+  display:flex;align-items:center;gap:1rem;
+  transition:all .3s;
+}
+.contact-card:hover{border-color:rgba(93,202,165,0.4);transform:translateY(-3px)}
+.contact-icon{
+  width:44px;height:44px;border-radius:10px;
+  background:rgba(127,119,221,0.1);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  flex-shrink:0;
+}
+.contact-label{font-size:11px;color:var(--muted);margin-bottom:3px;letter-spacing:1px;text-transform:uppercase}
+.contact-val{font-size:13px;color:var(--text);font-weight:500}
+
+/* FOOTER */
+footer{
+  padding:2rem 3rem;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;color:var(--muted);
+}
+footer a{color:var(--accent);text-decoration:none}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeLeft{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+
+/* VIEW ALL BTN */
+.view-all{
+  text-align:center;margin-top:2.5rem;
+}
+.view-all a{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 32px;
+  border:1px solid var(--border);
+  border-radius:30px;
+  color:var(--muted);text-decoration:none;
+  font-size:13px;font-weight:500;
+  transition:all .3s;
+}
+.view-all a:hover{border-color:var(--accent);color:var(--accent);background:var(--glow)}
+
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem}
+  .nav-links{display:none}
+  .hero{padding:6rem 1.5rem 4rem}
+  .hero-stats{display:none}
+  section{padding:4rem 1.5rem}
+  .projects-preview{grid-template-columns:1fr}
+  .proj-card.featured{grid-column:span 1}
+  .about-grid{grid-template-columns:1fr}
+  .contact-grid{grid-template-columns:1fr}
+  footer{flex-direction:column;gap:1rem;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">AFA<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="#skills">Compétences</a></li>
+    <li><a href="#projets">Projets</a></li>
+    <li><a href="#parcours">Parcours</a></li>
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-pages">
+    <a href="projects.html" class="nav-btn">Projets</a>
+    <a href="cv.html" class="nav-btn">CV</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-dot"></div>
+      <span>Disponible pour alternance & stage</span>
+    </div>
+    <h1 class="hero-title">
+      <span class="line">Fritzel ADJOVI</span>
+      <span class="line accent">ADJOVI</span>
+      <span class="line accent2">Infrastructure.</span>
+    </h1>
+    <p class="hero-sub">
+      Étudiant en Bachelor <strong>Administrateur Infrastructure Sécurisée</strong> à l'IPSSI Lille.
+      Passionné par les systèmes Linux & Windows Server, les réseaux et la cybersécurité.
+    </p>
+    <div class="hero-actions">
+      <a href="projects.html" class="btn-primary">Voir mes projets</a>
+      <a href="cv.html" class="btn-secondary">Télécharger mon CV</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">6<span>+</span></div>
+      <div class="stat-label">Projets réalisés</div>
+      <div class="stat-line"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2<span>ans</span></div>
+      <div class="stat-label">En France</div>
+      <div class="stat-line"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2025<span>/26</span></div>
+      <div class="stat-label">IPSSI Lille</div>
+      <div class="stat-line"></div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- COMPÉTENCES -->
+<section class="skills-section" id="skills">
+  <div class="section-header reveal">
+    <div class="section-num">01 — Compétences</div>
+    <h2 class="section-title">Ce que je <span>maîtrise</span></h2>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-card reveal reveal-delay-1">
+      <div class="skill-icon">🖥️</div>
+      <div class="skill-name">Systèmes & Virtualisation</div>
+      <div class="skill-tags">
+        <span class="tag tag-p">Linux Ubuntu/Debian</span>
+        <span class="tag tag-p">Windows Server 2025</span>
+        <span class="tag tag-p">VirtualBox</span>
+        <span class="tag tag-p">Hyper-V</span>
+        <span class="tag tag-p">Active Directory</span>
+      </div>
+    </div>
+    <div class="skill-card reveal reveal-delay-2">
+      <div class="skill-icon">🔐</div>
+      <div class="skill-name">Réseau & Sécurité</div>
+      <div class="skill-tags">
+        <span class="tag tag-g">SSH & Clés RSA</span>
+        <span class="tag tag-g">UFW / Firewall</span>
+        <span class="tag tag-g">Fail2ban</span>
+        <span class="tag tag-g">VPN RRAS/NPS</span>
+        <span class="tag tag-g">NAT / Routage</span>
+        <span class="tag tag-g">HAProxy</span>
+        <span class="tag tag-g">ACL / SGID / SUID</span>
+      </div>
+    </div>
+    <div class="skill-card reveal reveal-delay-3">
+      <div class="skill-icon">⚙️</div>
+      <div class="skill-name">Services & Outils</div>
+      <div class="skill-tags">
+        <span class="tag tag-a">Apache / IIS</span>
+        <span class="tag tag-a">DNS Bind9</span>
+        <span class="tag tag-a">MySQL</span>
+        <span class="tag tag-a">WSUS</span>
+        <span class="tag tag-a">RDS</span>
+        <span class="tag tag-a">VEEAM Backup</span>
+      </div>
+    </div>
+    <div class="skill-card reveal reveal-delay-4">
+      <div class="skill-icon">💻</div>
+      <div class="skill-name">Scripting & Automatisation</div>
+      <div class="skill-tags">
+        <span class="tag tag-b">Bash scripting</span>
+        <span class="tag tag-b">PowerShell</span>
+        <span class="tag tag-b">Variables d'env.</span>
+        <span class="tag tag-b">PAM</span>
+        <span class="tag tag-b">Git / GitHub</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJETS -->
+<section id="projets" style="background:var(--bg)">
+  <div class="section-header reveal">
+    <div class="section-num">02 — Projets</div>
+    <h2 class="section-title">Mes <span>réalisations</span></h2>
+  </div>
+  <div class="projects-preview">
+    <div class="proj-card featured reveal">
+      <div class="proj-os"><div class="proj-os-dot"></div>Windows Server · Projet de groupe</div>
+      <div class="proj-title">Infrastructure Windows Server — ETI 250 personnes</div>
+      <div class="proj-desc">Conception et déploiement complet d'une infrastructure centralisée : Active Directory, DHCP, DNS, WSUS, RDS et VEEAM Backup. Architecture multi-serveurs avec DMZ, estimation budgétaire ~45 200€.</div>
+      <div class="proj-tags">
+        <span class="tag tag-b">AD DS</span>
+        <span class="tag tag-b">DHCP/DNS</span>
+        <span class="tag tag-b">WSUS</span>
+        <span class="tag tag-b">RDS</span>
+        <span class="tag tag-b">VEEAM</span>
+        <span class="tag tag-b">PowerShell</span>
+      </div>
+    </div>
+    <div class="proj-card reveal reveal-delay-1">
+      <div class="proj-os"><div class="proj-os-dot" style="background:var(--accent2)"></div>Windows Server</div>
+      <div class="proj-title">Serveur VPN — AD + RRAS + NPS</div>
+      <div class="proj-desc">VPN sécurisé sous Windows Server 2025 avec authentification Active Directory et contrôle d'accès NPS. Pool 10.10.10.x, 91 adresses.</div>
+      <div class="proj-tags">
+        <span class="tag tag-g">VPN</span>
+        <span class="tag tag-g">RRAS</span>
+        <span class="tag tag-g">NPS</span>
+        <span class="tag tag-g">Active Directory</span>
+      </div>
+    </div>
+    <div class="proj-card reveal reveal-delay-2">
+      <div class="proj-os"><div class="proj-os-dot" style="background:var(--accent3)"></div>Linux</div>
+      <div class="proj-title">Load Balancer HAProxy — Weighted Round Robin</div>
+      <div class="proj-desc">Load balancer HAProxy sur Debian avec 3 VMs. Répartition 75%/25% du trafic HTTP entre deux serveurs Apache selon leurs capacités.</div>
+      <div class="proj-tags">
+        <span class="tag tag-a">HAProxy</span>
+        <span class="tag tag-a">Load Balancing</span>
+        <span class="tag tag-a">Apache</span>
+        <span class="tag tag-a">Debian</span>
+      </div>
+    </div>
+  </div>
+  <div class="view-all reveal">
+    <a href="projects.html">Voir tous les projets <span>→</span></a>
+  </div>
+</section>
+
+<!-- PARCOURS -->
+<section id="parcours" style="background:var(--bg2)">
+  <div class="section-header reveal">
+    <div class="section-num">03 — Parcours</div>
+    <h2 class="section-title">Mon <span>chemin</span></h2>
+  </div>
+  <div class="timeline">
+    <div class="tl-item reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2025 — 2026</div>
+      <div class="tl-title">Bachelor Administrateur Infrastructure Sécurisée</div>
+      <div class="tl-place">IPSSI · Lille, France</div>
+      <div class="tl-desc">3ème année de Bachelor spécialisée en administration des systèmes, réseaux et sécurité informatique.</div>
+    </div>
+    <div class="tl-item reveal reveal-delay-1">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2023 — 2025</div>
+      <div class="tl-title">Cycle Ingénieur — Tronc commun</div>
+      <div class="tl-place">ISEN · Lille, France</div>
+      <div class="tl-desc">Formation généraliste couvrant électronique, informatique, mathématiques et physique appliquée.</div>
+    </div>
+    <div class="tl-item reveal reveal-delay-2">
+      <div class="tl-dot"></div>
+      <div class="tl-date">2021 — 2023</div>
+      <div class="tl-title">Classes Préparatoires MPSI</div>
+      <div class="tl-place">Classe Préparatoire Marie-Stella · Bénin</div>
+      <div class="tl-desc">Deux années intensives en Mathématiques, Physique et Sciences de l'Ingénieur. Formation à la rigueur scientifique.</div>
+    </div>
+    <div class="tl-item reveal reveal-delay-3">
+      <div class="tl-dot green"></div>
+      <div class="tl-date">2021</div>
+      <div class="tl-title">Baccalauréat Scientifique</div>
+      <div class="tl-place">Collège Catholique Père Aupiais · Bénin</div>
+      <div class="tl-desc">Début d'un parcours exigeant entre Bénin et France.</div>
+    </div>
+  </div>
+</section>
+
+<!-- À PROPOS -->
+<section class="about-section" id="about">
+  <div class="section-header reveal">
+    <div class="section-num">04 — À propos</div>
+    <h2 class="section-title">Qui <span>suis-je ?</span></h2>
+  </div>
+  <div class="about-grid">
+    <div>
+      <p class="about-text reveal">
+        Né au <strong>Bénin</strong>, j'ai forgé une rigueur scientifique solide à travers des classes préparatoires exigeantes avant de poursuivre mes études en <strong>France à Lille</strong>. Mon parcours, entre ingénierie et informatique, m'a conduit vers ma vraie passion : les <strong>systèmes, les réseaux et la cybersécurité</strong>.
+      </p>
+      <p class="about-text reveal reveal-delay-1">
+        Aujourd'hui en formation à l'<strong>IPSSI Lille</strong>, je travaille chaque jour à maîtriser les infrastructures Windows Server et Linux, la sécurisation des réseaux, et l'administration des systèmes d'information.
+      </p>
+      <p class="about-text reveal reveal-delay-2">
+        Curieux, rigoureux et résilient — je crois que chaque défi est une opportunité d'apprendre et de progresser.
+      </p>
+    </div>
+    <div class="about-photo reveal reveal-delay-1">
+      <div class="about-photo-placeholder">
+        <div class="about-photo-icon">AFA</div>
+        <span>Photo à venir</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="background:var(--bg)">
+  <div class="section-header reveal">
+    <div class="section-num">05 — Contact</div>
+    <h2 class="section-title">Me <span>contacter</span></h2>
+  </div>
+  <div class="contact-grid">
+    <a class="contact-card reveal" href="https://www.linkedin.com/in/fritzel-adjovi-a95203386" target="_blank">
+      <div class="contact-icon">💼</div>
+      <div>
+        <div class="contact-label">LinkedIn</div>
+        <div class="contact-val">Fritzel ADJOVI</div>
+      </div>
+    </a>
+    <a class="contact-card reveal reveal-delay-1" href="https://github.com/fritzel-adjovi" target="_blank">
+      <div class="contact-icon">🐙</div>
+      <div>
+        <div class="contact-label">GitHub</div>
+        <div class="contact-val">fritzel-adjovi</div>
+      </div>
+    </a>
+    <a class="contact-card reveal reveal-delay-2" href="/cdn-cgi/l/email-protection#4e283c273a342b222f2a242138270e29232f2722602d2123">
+      <div class="contact-icon">✉️</div>
+      <div>
+        <div class="contact-label">Email</div>
+        <div class="contact-val"><span class="__cf_email__" data-cfemail="593f2b302d233c35383d33362f30193e34383035773a3634">[email&#160;protected]</span></div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2026 Fritzel ADJOVI</span>
+  <span>Fait avec passion · <a href="https://github.com/fritzel-adjovi" target="_blank">GitHub</a></span>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(2.5)';ring.style.width='60px';ring.style.height='60px'});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.width='36px';ring.style.height='36px'});
+});
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// Animated counters
+function animCount(el,target,suffix=''){
+  let start=0;
+  const step=()=>{
+    star
+    start+=Math.ceil(target/40);
+    if(start>=target){el.querySelector('span').textContent=suffix;el.childNodes[0].textContent=target;return}
+    el.childNodes[0].textContent=start;
+    requestAnimationFrame(step);
+  };
+  step();
+}
+</script>
+</body>
+</html>

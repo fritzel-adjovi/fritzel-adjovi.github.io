@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projets — Fritzel ADJOVI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#07070d;--bg2:#0e0e18;--bg3:#13131f;
+  --accent:#7f77dd;--accent2:#5dcaa5;--accent3:#ef9f27;
+  --text:#eeeaf8;--muted:#6b6880;--border:rgba(127,119,221,0.12);
+  --glow:rgba(127,119,221,0.15);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.7;overflow-x:hidden;cursor:none}
+.cursor{width:10px;height:10px;background:var(--accent);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transition:transform .15s ease;transform:translate(-50%,-50%)}
+.cursor-ring{width:36px;height:36px;border:1px solid rgba(127,119,221,0.5);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transition:transform .35s ease,width .2s,height .2s;transform:translate(-50%,-50%)}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1;opacity:0.4}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(20px);background:rgba(7,7,13,0.7);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);text-decoration:none;letter-spacing:-0.5px}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-pages{display:flex;gap:1rem}
+.nav-btn{padding:6px 16px;border:1px solid var(--border);border-radius:20px;color:var(--muted);text-decoration:none;font-size:12px;font-weight:500;transition:all .2s}
+.nav-btn:hover,.nav-btn.active{border-color:var(--accent);color:var(--accent);background:var(--glow)}
+
+/* PAGE HEADER */
+.page-header{
+  padding:10rem 3rem 4rem;
+  position:relative;overflow:hidden;
+}
+.page-header-bg{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 50% 60% at 60% 50%,rgba(127,119,221,0.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.page-header-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(127,119,221,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(127,119,221,0.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 100%);
+  pointer-events:none;
+}
+.page-eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;opacity:0;animation:fadeUp .6s .2s forwards}
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-2px;line-height:1.05;opacity:0;animation:fadeUp .7s .4s forwards}
+.page-title span{color:var(--accent)}
+.page-sub{font-size:15px;color:var(--muted);max-width:500px;margin-top:1rem;line-height:1.8;opacity:0;animation:fadeUp .7s .6s forwards}
+
+/* FILTERS */
+.filters{
+  padding:0 3rem 3rem;
+  display:flex;gap:10px;flex-wrap:wrap;
+  position:relative;z-index:2;
+}
+.filter-btn{
+  padding:8px 20px;border-radius:30px;
+  border:1px solid var(--border);
+  background:transparent;color:var(--muted);
+  font-size:12px;font-weight:500;font-family:'Inter',sans-serif;
+  cursor:none;transition:all .25s;letter-spacing:.5px;
+}
+.filter-btn:hover,.filter-btn.active{border-color:var(--accent);color:var(--accent);background:var(--glow)}
+.filter-btn.active{font-weight:600}
+
+/* PROJECTS GRID */
+.projects-container{padding:0 3rem 6rem;position:relative;z-index:2}
+.projects-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+
+.proj-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:20px;padding:2rem;
+  transition:all .35s;position:relative;overflow:hidden;
+  cursor:none;
+}
+.proj-card::before{
+  content:'';position:absolute;inset:0;border-radius:20px;
+  background:linear-gradient(135deg,rgba(127,119,221,0.04),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.proj-card:hover{border-color:rgba(127,119,221,0.35);transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.proj-card:hover::before{opacity:1}
+.proj-card.featured{grid-column:span 2}
+.proj-card.windows .proj-card-accent{background:linear-gradient(90deg,var(--accent),rgba(127,119,221,0))}
+.proj-card.linux .proj-card-accent{background:linear-gradient(90deg,var(--accent2),rgba(93,202,165,0))}
+.proj-card.windows-linux .proj-card-accent{background:linear-gradient(90deg,var(--accent3),rgba(239,159,39,0))}
+
+.proj-card-accent{height:2px;position:absolute;top:0;left:0;right:0;border-radius:20px 20px 0 0;transform:scaleX(0);transition:transform .35s;transform-origin:left}
+.proj-card:hover .proj-card-accent{transform:scaleX(1)}
+
+.proj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.2rem}
+.proj-os{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:500}
+.proj-os.win{color:var(--accent)}
+.proj-os.lin{color:var(--accent2)}
+.proj-os.mix{color:var(--accent3)}
+.proj-os-dot{width:7px;height:7px;border-radius:50%}
+.proj-os.win .proj-os-dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.proj-os.lin .proj-os-dot{background:var(--accent2);box-shadow:0 0 8px var(--accent2)}
+.proj-os.mix .proj-os-dot{background:var(--accent3);box-shadow:0 0 8px var(--accent3)}
+
+.proj-date{font-size:11px;color:var(--muted)}
+.proj-icon{font-size:2rem;margin-bottom:1rem}
+.proj-title{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.6rem;line-height:1.3}
+.proj-card.featured .proj-title{font-size:1.4rem}
+.proj-desc{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:1.2rem}
+.proj-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.2rem}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid}
+.tag-p{background:rgba(127,119,221,0.08);border-color:rgba(127,119,221,0.2);color:#a9a3e8}
+.tag-g{background:rgba(93,202,165,0.08);border-color:rgba(93,202,165,0.2);color:#5dcaa5}
+.tag-a{background:rgba(239,159,39,0.08);border-color:rgba(239,159,39,0.2);color:#ef9f27}
+.tag-b{background:rgba(55,138,221,0.08);border-color:rgba(55,138,221,0.2);color:#378add}
+
+/* DETAILS ACCORDEON */
+.proj-details{
+  border-top:1px solid var(--border);
+  padding-top:1.2rem;
+  max-height:0;overflow:hidden;
+  transition:max-height .4s ease,padding .3s;
+}
+.proj-card.open .proj-details{max-height:600px;padding-top:1.2rem}
+.proj-detail-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem}
+.proj-detail-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.proj-detail-list li{font-size:12px;color:var(--muted);padding-left:1rem;position:relative}
+.proj-detail-list li::before{content:'▸';position:absolute;left:0;color:var(--accent);font-size:10px}
+
+.proj-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--accent);
+  background:none;border:none;cursor:none;
+  font-family:'Inter',sans-serif;font-weight:500;
+  transition:gap .2s;margin-top:.8rem;
+}
+.proj-toggle:hover{gap:10px}
+.proj-toggle .arrow{transition:transform .3s;font-size:14px}
+.proj-card.open .proj-toggle .arrow{transform:rotate(90deg)}
+
+/* HIDDEN FOR FILTER */
+.proj-card.hidden{display:none}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+.reveal-delay-5{transition-delay:.5s}
+
+/* FOOTER */
+footer{padding:2rem 3rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);position:relative;z-index:2}
+footer a{color:var(--accent);text-decoration:none}
+
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem}
+  .nav-links{display:none}
+  .page-header{padding:8rem 1.5rem 3rem}
+  .filters{padding:0 1.5rem 2rem}
+  .projects-container{padding:0 1.5rem 4rem}
+  .projects-grid{grid-template-columns:1fr}
+  .proj-card.featured{grid-column:span 1}
+  footer{flex-direction:column;gap:1rem;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">AFA<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html#skills">Compétences</a></li>
+    <li><a href="index.html#parcours">Parcours</a></li>
+    <li><a href="index.html#about">À propos</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+  <div class="nav-pages">
+    <a href="projects.html" class="nav-btn active">Projets</a>
+    <a href="cv.html" class="nav-btn">CV</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-bg"></div>
+  <div class="page-header-grid"></div>
+  <div class="page-eyebrow">02 — Projets académiques</div>
+  <h1 class="page-title">Mes <span>réalisations</span></h1>
+  <p class="page-sub">Projets réalisés à l'IPSSI Lille en 2025–2026, couvrant Linux, Windows Server, cybersécurité et infrastructure réseau.</p>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">Tous (6)</button>
+  <button class="filter-btn" data-filter="windows">🪟 Windows Server</button>
+  <button class="filter-btn" data-filter="linux">🐧 Linux</button>
+  <button class="filter-btn" data-filter="securite">🔐 Sécurité</button>
+  <button class="filter-btn" data-filter="reseau">🌐 Réseau</button>
+</div>
+
+<!-- PROJECTS -->
+<div class="projects-container">
+  <div class="projects-grid">
+
+    <!-- PROJET 1 — FEATURED -->
+    <div class="proj-card featured windows reveal" data-categories="windows reseau">
+      <div class="proj-card-accent"></div>
+      <div class="proj-header">
+        <div class="proj-os win"><div class="proj-os-dot"></div>Windows Server · Projet de groupe</div>
+        <div class="proj-date">Fév. 2026</div>
+      </div>
+      <div class="proj-icon">🏗️</div>
+      <div class="proj-title">Infrastructure Windows Server — ETI 250 personnes</div>
+      <div class="proj-desc">Conception et déploiement complet d'une infrastructure serveur Windows centralisée pour une ETI de 250 personnes. Domaine <code style="color:var(--accent2);background:rgba(93,202,165,0.08);padding:1px 6px;border-radius:4px;font-size:12px">entreprise.local</code>. Architecture multi-serveurs avec DMZ, double contrôleur de domaine, estimation budgétaire ~45 200€.</div>
+      <div class="proj-tags">
+        <span class="tag tag-b">AD DS</span>
+        <span class="tag tag-b">DHCP / DNS</span>
+        <span class="tag tag-b">WSUS</span>
+        <span class="tag tag-b">RDS</span>
+        <span class="tag tag-b">VEEAM Backup</span>
+        <span class="tag tag-b">PowerShell</span>
+        <span class="tag tag-b">Windows Server 2025</span>
+      </div>
+      <button class="proj-toggle" onclick="toggleCard(this)">
+        Voir les détails <span class="arrow">›</span>
+      </button>
+      <div class="proj-details">
+        <div class="proj-detail-title">Ce qui a été déployé</div>
+        <ul class="proj-detail-list">
+          <li>SRV-DC01 : Active Directory Domain Services, DNS Server, Windows Server Backup</li>
+          <li>SRV-DC02 : Contrôleur de domaine secondaire (failover AD + DNS)</li>
+          <li>SRV-INFRA : DHCP Server (plage 192.168.10.51–253), WSUS, Remote Desktop Services</li>
+          <li>S1, S2, S3 : Serveurs de stockage fichiers (192.168.10.31–33)</li>
+          <li>Création de 25+ utilisateurs via script PowerShell, 3 groupes AD (Direction, Commercial, Support-IT)</li>
+          <li>GPO déployée pour pointer les postes vers WSUS automatiquement</li>
+          <li>VEEAM configuré avec sauvegarde quotidienne planifiée + test de restauration réussi</li>
+          <li>Architecture réseau avec DMZ, 2 routeurs redondants, firewall central</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PROJET 2 -->
+    <div class="proj-card windows reveal reveal-delay-1" data-categories="windows securite reseau">
+      <div class="proj-card-accent"></div>
+      <div class="proj-header">
+        <div class="proj-os win"><div class="proj-os-dot"></div>Windows Server</div>
+        <div class="proj-date">2025–2026</div>
+      </div>
+      <div class="proj-icon">🔐</div>
+      <div class="proj-title">Serveur VPN — Windows Server 2025 AD + RRAS + NPS</div>
+      <div class="proj-desc">Déploiement d'un serveur VPN sécurisé avec authentification Active Directory. Accès restreint au groupe <code style="color:var(--accent2);background:rgba(93,202,165,0.08);padding:1px 6px;border-radius:4px;font-size:12px">grp_vpn</code>, pool d'adresses 10.10.10.10–100 (91 adresses).</div>
+      <div class="proj-tags">
+        <span class="tag tag-g">VPN</span>
+        <span class="tag tag-g">RRAS</span>
+        <span class="tag tag-g">NPS</span>
+        <span class="tag tag-p">Active Directory</span>
+        <span class="tag tag-b">Windows Server 2025</span>
+      </div>
+      <button class="proj-toggle" onclick="toggleCard(this)">
+        Voir les détails <span class="arrow">›</span>
+      </button>
+      <div class="proj-details">
+        <div class="proj-detail-title">Étapes réalisées</div>
+        <ul class="proj-detail-list">
+          <li>Création groupe de sécurité AD <code style="color:var(--accent2);font-size:11px">grp_vpn</code> avec utilisateurs de test</li>
+          <li>Installation rôle Accès distant (DirectAccess et VPN/RAS) sur serveur IIS</li>
+          <li>Configuration RRAS : accès VPN + routage réseau, interface WAN identifiée</li>
+          <li>Pool d'adresses IPv4 statique : 10.10.10.10 → 10.10.10.100 (91 adresses)</li>
+          <li>Stratégie NPS GRP_SRV_VPN_ALLOW : accorde l'accès uniquement à grp_vpn</li>
+          <li>Test client : connexion VPN établie, IP attribuée 10.10.10.12 ✅</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PROJET 3 -->
+    <div class="proj-card windows reveal reveal-delay-2" data-categories="windows reseau">
+      <div class="proj-card-accent"></div>
+      <div class="proj-header">
+        <div class="proj-os win"><div class="proj-os-dot"></div>Windows Server</div>
+        <div class="proj-date">2025–2026</div>
+      </div>
+      <div class="proj-icon">🌐</div>
+      <div class="proj-title">Routeur NAT & Redirection RDP — IIS/RRAS</div>
+      <div class="proj-desc">Transformation d'un serveur IIS en routeur NAT via RRAS. Interconnexion de deux réseaux avec redirection de port RDP (3389) vers une machine interne.</div>
+      <div class="proj-tags">
+        <span class="tag tag-b">NAT / Routage</span>
+        <span class="tag tag-b">RRAS</span>
+        <span class="tag tag-b">RDP</span>
+        <span class="tag tag-b">Port Forwarding</span>
+        <span class="tag tag-p">Windows Server</span>
+      </div>
+      <button class="proj-toggle" onclick="toggleCard(this)">
+        Voir les détails <span class="arrow">›</span>
+      </button>
+      <div class="proj-details">
+        <div class="proj-detail-title">Architecture et résultats</div>
+        <ul class="proj-detail-list">
+          <li>IIS interface WAN : réseau existant 192.168.10.x / interface LAN : 192.168.20.254</li>
+          <li>RRAS configuré en mode NAT, interface WAN sélectionnée pour la connexion Internet</li>
+          <li>Client test : 192.168.20.200, passerelle 192.168.20.254, DNS 192.168.10.100</li>
+          <li>Redirection port 3389 TCP vers machine interne 192.168.20.200</li>
+          <li>Tests validés : ping, nslookup, accès Internet depuis le réseau interne ✅</li>
+          <li>Connexion RDP depuis extérieur du LAN fonctionnelle ✅</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PROJET 4 -->
+    <div class="proj-card linux reveal reveal-delay-1" data-categories="linux reseau">
+      <div class="proj-card-accent"></div>
+      <div class="proj-header">
+        <div class="proj-os lin"><div class="proj-os-dot"></div>Linux · Debian</div>
+        <div class="proj-date">2025–2026</div>
+      </div>
+      <div class="proj-icon">⚖️</div>
+      <div class="proj-title">Load Balancer HAProxy — Weighted Round Robin</div>
+      <div class="proj-desc">Load balancer HAProxy sur Debian avec algorithme Weighted Round Robin. Distribution 75%/25% du trafic HTTP entre deux serveurs Apache selon leurs capacités.</div>
+      <div class="proj-tags">
+        <span class="tag tag-a">HAProxy</span>
+        <span class="tag tag-a">Load Balancing</span>
+        <span class="tag tag-a">Round Robin</span>
+        <span class="tag tag-g">Apache</span>
+        <span class="tag tag-g">Debian</span>
+      </div>
+      <button class="proj-toggle" onclick="toggleCard(this)">
+        Voir les détails <span class="arrow">›</span>
+      </button>
+      <div class="proj-details">
+        <div class="proj-detail-title">Configuration et tests</div>
+        <ul class="proj-detail-list">
+          <li>3 VMs : HA-Proxy (192.168.10.254), srv-web1 (10.10.10.10), srv-web2 (10.10.10.20)</li>
+          <li>Frontend HTTP bind *:80, backend web_back en Weighted Round Robin</li>
+          <li>srv-web1 : weight 3 → 75% du trafic / srv-web2 : weight 1 → 25% du trafic</li>
+          <li>Health checks HTTP GET / avec status 200 attendu</li>
+          <li>Interface statistiques HAProxy sur port 8080</li>
+          <li>POC validé : 4 curl → 3× serveur web 1, 1× serveur web 2 ✅</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PROJET 5 -->
+    <div class="proj-card linux reveal reveal-delay-2" data-categories="linux securite">
+      <div class="proj-card-accent"></div>
+      <div class="proj-header">
+        <div class="proj-os lin"><div class="proj-os-dot"></div>Linux · Ubuntu</div>
+        <div class="proj-date">2025–2026</div>
+      </div>
+      <div class="proj-icon">🔒</div>
+      <div class="proj-title">Sécurisation SSH — UFW, Fail2ban & Clés RSA</div>
+      <div class="proj-desc">Sécurisation complète d'un serveur SSH Ubuntu : pare-feu UFW, authentification par clés RSA 4096 bits, protection anti brute-force Fail2ban testée avec Hydra.</div>
+      <div class="proj-tags">
+        <span class="tag tag-g">SSH</span>
+        <span class="tag tag-g">UFW</span>
+        <span class="tag tag-g">Fail2ban</span>
+        <span class="tag tag-g">Clés RSA 4096</span>
+        <span class="tag tag-a">Hydra</span>
+      </div>
+      <button class="proj-toggle" onclick="toggleCard(this)">
+        Voir les détails <span class="arrow">›</span>
+      </button>
+      <div class="proj-details">
+        <div class="proj-detail-title">Ce qui a été configuré</div>
+        <ul class="proj-detail-list">
+          <li>UFW : deny incoming par défaut, SSH autorisé uniquement depuis 192.168.1.101</li>
+          <li>Génération clés RSA 4096 bits avec ssh-keygen, copie via ssh-copy-id</li>
+          <li>Désactivation authentification par mot de passe sur le serveur SSH</li>
+          <li>Fail2ban : bannissement après 3 tentatives échouées</li>
+          <li>Test brute-force avec Hydra → IP bannie automatiquement ✅</li>
+          <li>Permissions spéciales : SGID, SUID, Sticky Bit testés et validés</li>
+          <li>ACL : droits granulaires sur dossiers dev, rh, direction + dossier commun</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PROJET 6 -->
+    <div class="proj-card linux reveal reveal-delay-3" data-categories="linux reseau securite">
+      <div class="proj-card-accent"></div>
+      <div class="proj-header">
+        <div class="proj-os lin"><div class="proj-os-dot"></div>Linux · Ubuntu</div>
+        <div class="proj-date">2025–2026</div>
+      </div>
+      <div class="proj-icon">🖥️</div>
+      <div class="proj-title">Lab Linux — Administration système & Infrastructure réseau</div>
+      <div class="proj-desc">Administration complète d'Ubuntu via terminal, déploiement d'une stack réseau complète (Apache, DNS Bind9, MySQL) et scripting Bash avancé avec PAM.</div>
+      <div class="proj-tags">
+        <span class="tag tag-p">Linux</span>
+        <span class="tag tag-p">VirtualBox</span>
+        <span class="tag tag-g">Apache</span>
+        <span class="tag tag-g">DNS Bind9</span>
+        <span class="tag tag-g">MySQL</span>
+        <span class="tag tag-a">Bash</span>
+        <span class="tag tag-a">PAM</span>
+      </div>
+      <button class="proj-toggle" onclick="toggleCard(this)">
+        Voir les détails <span class="arrow">›</span>
+      </button>
+      <div class="proj-details">
+        <div class="proj-detail-title">Compétences mises en pratique</div>
+        <ul class="proj-detail-list">
+          <li>Installation Ubuntu dans VirtualBox, navigation terminal complète</li>
+          <li>Gestion droits chmod, groupes/utilisateurs Linux (dev, rh, direction)</li>
+          <li>Surveillance processus top/htop, gestion espace disque df/du</li>
+          <li>Serveur Apache, DNS Bind9 zone example.local (A, NS, CNAME), MySQL</li>
+          <li>Scripts Bash : variables, boucles, conditions, vérification utilisateurs</li>
+          <li>Variables d'environnement USER_FILE pointant vers /etc/passwd</li>
+          <li>Intégration règles PAM dans les scripts de gestion utilisateurs</li>
+          <li>Surveillance réseau : netstat, iftop, tcpdump</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <span>© 2026 Fritzel ADJOVI</span>
+  <span><a href="index.html">← Retour à l'accueil</a></span>
+</footer>
+
+<script>
+// Custom cursor
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing)}
+animRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(2.5)';ring.style.width='60px';ring.style.height='60px'});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.width='36px';ring.style.height='36px'});
+});
+
+// Scroll reveal
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// Toggle card details
+function toggleCard(btn){
+  const card=btn.closest('.proj-card');
+  card.classList.toggle('open');
+  btn.innerHTML=card.classList.contains('open')
+    ?'Masquer les détails <span class="arrow" style="display:inline-block;transform:rotate(90deg)">›</span>'
+    :'Voir les détails <span class="arrow">›</span>';
+}
+
+// Filter
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter=btn.dataset.filter;
+    document.querySelectorAll('.proj-card').forEach(card=>{
+      if(filter==='all'||card.dataset.categories.includes(filter)){
+        card.classList.remove('hidden');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
